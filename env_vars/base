@@ -1,6 +1,27 @@
 ---
 
-git_repo: https://github.com/jcalazan/glucose-tracker.git
+git_repo: ssh://git@stash.sharplabs.com:7999/sasbd/ssg.git
 
-project_name: glucose-tracker
-application_name: glucosetracker
+project_name: bigdata
+application_name: bigdata
+
+# Application bigdata
+django_settings_file: settings
+django_secret_key: t9khtjio2ftjdza5riljc!e0n!cip1h0-6xj*h$=okb^^3(3zj
+
+run_django_syncdb: yes
+run_django_south_migration: no
+run_django_collectstatic: yes
+# run_bower_install: yes
+
+# SMTP settings.
+smtp_host: smtp.gmail.com
+smtp_user: server.sharplabs@gmail.com
+
+
+
+# private
+db_password: password
+ssl_key_password: password
+smtp_password: password
+django_secret_key: password_abcdefghijklmnopqurtuvwxyzABC123

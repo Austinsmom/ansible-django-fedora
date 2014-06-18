@@ -3,7 +3,6 @@
 # Database settings.
 db_user: "{{ application_name }}"
 db_name: "{{ application_name }}"
-db_password: password
 
 
 # Gunicorn settings. For the number of workers, a good rule to follow is
@@ -20,19 +19,17 @@ gunicorn_max_requests: 0
 nginx_server_name: "{{ inventory_hostname }}"
 ssl_src_dir: ssl_self_signed
 ssl_dest_dir: /etc/ssl
-ssl_key_password: password
 
 
 # SMTP settings.
 smtp_host: smtp.gmail.com
-smtp_user: admin@example.com
-smtp_password: mypassword
+smtp_user: server.sharplabs@gmail.com
 
 
-# Application settings.
-django_settings_file: settings.dev
-django_secret_key: akr2icmg1n8%z^3fe3c+)5d0(t^cy-2_25rrl35a7@!scna^1#
+# Application bigdata
+django_settings_file: settings
 
 run_django_syncdb: yes
-run_django_south_migration: yes
+run_django_south_migration: no
 run_django_collectstatic: yes
+# run_bower_install: yes
