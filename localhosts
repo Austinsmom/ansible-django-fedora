@@ -1,0 +1,8 @@
+[webservers]
+localhost
+
+[dbservers]
+localhost
+
+[memcachedservers]
+localhost

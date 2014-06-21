@@ -1,5 +1,4 @@
 ---
-
 git_repo: ssh://git@stash.sharplabs.com:7999/sasbd/ssg.git
 
 project_name: bigdata
@@ -7,7 +6,6 @@ application_name: bigdata
 
 # Application bigdata
 django_settings_file: settings
-django_secret_key: t9khtjio2ftjdza5riljc!e0n!cip1h0-6xj*h$=okb^^3(3zj
 
 run_django_syncdb: yes
 run_django_south_migration: no
@@ -16,12 +14,30 @@ run_django_collectstatic: yes
 
 # SMTP settings.
 smtp_host: smtp.gmail.com
-smtp_user: server.sharplabs@gmail.com
+smtp_user: example.user.name@gmail.com
+
+port_ssh: 22
+port_http: 80
+port_http_debug: 8000
+port_https: 443
+port_postgres: 5432
+
+dbs_to_backup: []
 
 
+private_path: private
 
-# private
-db_password: password
-ssl_key_password: password
-smtp_password: password
-django_secret_key: password_abcdefghijklmnopqurtuvwxyzABC123
+# Placeholders below for secrets that should be encrypted or stored outside repo
+# Override these in private/vars.yml if you want git-crypt to encrypt them ans store them in repo
+
+db_password: plain_text_password
+ssl_key_password: plain_text_password
+smtp_password: plain_text_password
+django_secret_key: '1234567891230913098987qwertyuipasdfasdfasd^-*$=()!'
+# Username with sudo privileges on the remote machine. Will be used by ansible to sudo stuff.
+# If not specified `root` is the default
+sudo_user: root
+# the name of the user on the remote system that you are using to ssh into it as, e.g. `ssh remote_user@remote_server.com`
+remote_user: root
+# postgres_sudo_user: postgres
+

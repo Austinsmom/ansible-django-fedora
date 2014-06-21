@@ -1,7 +1,8 @@
 ---
 
 - name: Ensure OpenSSl and libssl are the latest versions
-  apt: name={{ item }} update_cache={{ update_apt_cache }} state=latest
+#  apt: name={{ item }} update_cache={{ update_apt_cache }} state=latest
+  yum: name={{ item }} state=latest
   with_items:
     - openssl
     - libssl-dev
@@ -9,11 +10,20 @@
   tags: packages
 
 - name: Install base packages
-  apt: name={{ item }} update_cache={{ update_apt_cache }} force=yes state=installed
+  # apt: name={{ item }} update_cache={{ update_apt_cache }} force=yes state=installed
+  # with_items:
+  #   - build-essential
+  #   - htop
+  #   - git
+  #   - python-dev
+  #   - python-pip
+  #   - python-pycurl
+  #   - supervisor
+  yum: name={{ item }} state=installed
   with_items:
-    - build-essential
-    - htop
+    - '"@Development Tools"'
     - git
+    - htop
     - python-dev
     - python-pip
     - python-pycurl
