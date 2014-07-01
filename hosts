@@ -6,3 +6,6 @@
 
 [memcachedservers]
 172.29.225.2
+
+[local]
+127.0.0.1

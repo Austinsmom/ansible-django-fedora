@@ -44,7 +44,7 @@
     src=cron-backup-database
     dest=/etc/cron.d/cron-backup-database-{{ item }}
   with_items:
-  - "{{ dbs_to_backup }}"
+    - "{{ dbs_to_backup }}"
   when: dbs_to_backup != []
   tags:
-  - cron
+    - cron

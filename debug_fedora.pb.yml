@@ -70,7 +70,7 @@
   sudo_user: postgres
   vars_files: 
   - /srv/web/infra/ansible/vars/global.yml
-  - "{{ private_path }}/vars.yml"
+  - private/vars.yml
   - "{{ vars_path }}/{{ ansible_distribution }}.yml"
   vars:
   - mailman_vardir: /srv/persist/mailman
@@ -100,7 +100,7 @@
   gather_facts: no
   vars_files: 
   - /srv/web/infra/ansible/vars/global.yml
-  - "{{ private }}/vars.yml"
+  - private/vars.yml
   - "{{ vars_path }}/{{ ansible_distribution }}.yml"
   vars:
   # override roles variables

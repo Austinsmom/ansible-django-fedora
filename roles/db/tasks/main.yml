@@ -17,14 +17,18 @@
   tags:
     - service
 
+- name: Initialize database
+  command: service postgresql initdb creates=/var/lib/pgsql/data/postgresql.conf
+
 - name: Add our postgres config file.  # rather than doing a `service postgresql initdb`, just copy over the 2 config files
   copy: >
-    src={{ private_path }}/files/{{ item }}
+    src=private/files/{{ item }}
     dest=/var/lib/pgsql/data/{{ item }}
     owner=postgres
   with_items:
     - pg_hba.conf
     - postgresql.conf
+    # - pg_ident.conf
   notify:
     - restart postgresql
   tags:
@@ -33,45 +37,45 @@
 - name: Ensure postgres has a place to backup to
   file: dest=/backups state=directory owner=postgres
 
-- name: Copy over backup scriplet
-  copy: src=backup-database dest=/usr/local/bin/backup-database mode=0755
+- name: Copy over backup and pg_dump and psql restore scripts
+  copy: src={{ item }} dest=/usr/local/bin/{{ item }} mode=0755
+  with_items:
+    - backup-database
+    - restore-database
 
 - name: Set up some cronjobs to backup databases as configured
   template: >
     src=cron-backup-database
     dest=/etc/cron.d/cron-backup-database-{{ item }}
   with_items:
-  - "{{ dbs_to_backup }}"
+    - "{{ dbs_to_backup }}"
   when: dbs_to_backup != []
   tags:
-  - cron
+    - cron
 
 - name: Ensure the PostgreSQL service is running
   service: name=postgresql state=restarted enabled=yes
-  # sudo_user: "{{ postgres_sudo_user }}"
-  # sudo: yes
+  #"{{ postgres_sudo_user }}"
+  # sudo_user: postgres 
+  sudo: yes
   tags:
     - running
 
-- name: Ensure database {{ db_name }} is created
+- name: Ensure databases {{ db_names }} are created
   # sudo_user: "{{ postgres_sudo_user }}"
-  postgresql_db: db={{ db_name }} state=present
+  # sudo_user: postgres
+  # sudo: yes
+  postgresql_db: name={{ item }} state=present encoding='UTF-8' lc_collate='en_US.UTF-8' lc_ctype='en_US.UTF-8'
+  with_items: "{{ db_names }}"
   tags:
-    - debug
+    - db
+
+- name: ensure user {{ db_user }} has access to these databases
+  action: postgresql_user db={{ item }} user={{ db_user }} password={{ db_password }} priv=ALL state=present
+  with_items: "{{ db_names }}"
 
 
 # # sudo usermod -a -G dev,bigdata postgres
-
-# - name: Initialize database
-#   command: service postgresql initdb 
-#            creates=/var/lib/pgsql/data/postgresql.conf
-
-# - name: Start PostgreSQL and enable at boot
-#   service: name=postgresql enabled=yes state=started
-
-
-
-
 
 
 # # - name: Ensure database is created

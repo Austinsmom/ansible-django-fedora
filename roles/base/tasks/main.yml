@@ -1,12 +1,30 @@
 ---
+# - name: /tmp/ansible/ directory exists with 0777 permission
+#   file: path=/tmp/ansible/ owner=root group=root mode=0777 recurse=no state=directory
+#   sudo: yes
+
+# - name: /var/log/yum.log file exists with 0777 permission
+#   file: path=/var/log/yum.log owner=root group=root mode=0777 recurse=no state=file
+#   sudo: yes
+
+- name: Install VMWare Tools
+  yum: name={{ item }}  state=installed
+  with_items:
+    - open-vm-tools
+  tags: packages
 
 - name: Ensure OpenSSl and libssl are the latest versions
-#  apt: name={{ item }} update_cache={{ update_apt_cache }} state=latest
+#  apt: name={{ item }} update_cache={{ update_apt_cache }} state=latest    
+#  with_items:
+#    - openssl
+#    - libssl-dev
+#    - libssl-doc
   yum: name={{ item }} state=latest
   with_items:
     - openssl
-    - libssl-dev
-    - libssl-doc
+    - openssl-devel
+    - openssl-static
+    - openssl-perl
   tags: packages
 
 - name: Install base packages
@@ -23,17 +41,30 @@
   with_items:
     - '"@Development Tools"'
     - git
+    - curl
+    - wget
     - htop
-    - python-dev
-    - python-pip
+    - nano
+    - tree
+    - python-devel
     - python-pycurl
+    - ipython
     - supervisor
   tags: packages
 
-- name: Install newrelic
-  pip: name=newrelic
-  tags: packages
+- name: Install latest (non-yum) pip as well as ansible (on the ansible node vm!)
+  # nested sudoing here
+  shell: curl --silent --insecure --location https://bootstrap.pypa.io/get-pip.py | python; pip install ansible
+  sudo: yes
+  tags: pip-packages
 
-- name: Install virtualenv
-  pip: name=virtualenv
-  tags: packages
+- name: Pip install virtualenv and virtualenv-wrapper
+  with_items: 
+  pip: name={{ item }}
+  with_items:
+    - virtualenv
+    - virtualenvwrapper
+#    - newrelic
+  tags: pip-packages
+
+

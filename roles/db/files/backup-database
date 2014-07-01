@@ -1,6 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Backup a database *locally* to /backups/.
 
 DB=$1
 
+cd /tmp
 /usr/bin/pg_dump -C $DB | /usr/bin/xz > /backups/$DB-$(date +%F).dump.xz
