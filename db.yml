@@ -2,8 +2,6 @@
 
 - name: "Install postgressql+nginx+django for a production {{ application_name }} webapp"
   hosts: dbservers
-  user: "{{ user }}"
-  sudo: "{{ sudo }}"
   sudo_user: "{{ sudo_user }}"
   remote_user: "{{ remote_user }}"
   vars:

@@ -53,7 +53,7 @@
   tags: packages
 
 - name: Install latest (non-yum) pip as well as ansible (on the ansible node vm!)
-  # nested sudoing here
+  # TODO: nested sudoing here seems odd
   shell: curl --silent --insecure --location https://bootstrap.pypa.io/get-pip.py | python; pip install ansible
   sudo: yes
   tags: pip-packages
