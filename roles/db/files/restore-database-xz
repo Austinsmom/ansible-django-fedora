@@ -1,0 +1,56 @@
+#!/bin/bash
+# Restore a database *locally* from /backups/.
+
+
+EXT=".psql"
+XZ_EXT=".xz"
+DUMP_FORMAT="plain"
+
+DB_PATH=$1
+
+# If you don't first change to the /tmp directory, then you may not be able to cd to the directory you are already in! 
+# e.g.: could not change directory to "/home/Hobson": Permission denied
+mkdir -p /tmp
+OLDPWD=`pwd`
+cd /tmp
+
+# if the specified database is a path to a symlink, then dereference it
+if [ -L "$DB_PATH" ]; then
+    DB_PATH=`readlink -f "$DB_PATH"`
+# if the specified database is a symlink in the /backups folder, then dereference it
+elif [ -L /backups/$DB_PATH-latest$EXT$XZ_EXT ]; then
+    DB_PATH=`readlink -f "/backups/$DB_PATH-latest$EXT$XZ_EXT"`
+# if the specified database is the prefix of a file named $DB-lastest in the /backups folder, then use it
+elif [ -f "/backups/$DB_PATH-latest$EXT$XZ_EXT" ]; then
+    DB_PATH="/backups/$DB_PATH-latest$EXT$XZ_EXT"
+fi
+
+# deconstruct the file path to get various file names and paths (uncompressed, database name, -latest symlink, etc)
+DB_PATH_UNXZ=${DB_PATH%$XZ_EXT}
+DB_FILE_UNXZ=${DB_PATH_UNXZ##*/}
+DB_FILE=${DB_PATH##*/}
+DB_BASENAME=${DB_FILE%$EXT$XZ_EXT}
+DB_NAME=${DB_BASENAME%-latest}
+DB_NAME=${DB_NAME%%-????-??-??}
+
+echo "Database Name appears to be \"$DB_NAME\"."
+
+if [ -f "$DB_PATH" ]; then
+    # if XZ_EXT is not zero-length, then need to decompress before loading 
+    if [ -n "$XZ_EXT" ]; then
+        /usr/bin/unxz --keep --force "$DB_PATH"
+        # /usr/bin/xzcat "$DB_PATH" | pgsql --set ON_ERROR_STOP=on # $DB_NAME
+    fi
+    # if the decompressed file doesn't exist then can't restore the database
+    if [ -f "$DB_PATH_UNXZ" ]; then
+        # there's no need to specify the database name if --create is specified in the pg_dump
+        pg_restore "$DB_PATH_UNXZ"  # --dbname="$DB_NAME"
+        # need to remove any uncompressed files, if they exist
+        rm -f "$DB_PATH_UNXZ"
+    fi
+fi
+
+if [ -d "$OLDPWD" ]; then
+    cd "$OLDPWD"
+fi
+
