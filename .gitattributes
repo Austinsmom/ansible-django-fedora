@@ -2,18 +2,15 @@ private filter=git-crypt diff=git-crypt
 private/* filter=git-crypt diff=git-crypt
 private/files/* filter=git-crypt diff=git-crypt
 *.private filter=git-crypt diff=git-crypt
-
 secret filter=git-crypt diff=git-crypt
 secret/* filter=git-crypt diff=git-crypt
 secret/files/* filter=git-crypt diff=git-crypt
 *.secret filter=git-crypt diff=git-crypt
-
 *.key filter=git-crypt diff=git-crypt
 id_rsa*
 .ssh/*
 .ssh
 *.ssh
-
 hosts
 inventory
 inventory/*
