@@ -43,12 +43,26 @@
     - backup-database
     - restore-database
 
+- name: Copy over backed-up database file
+  # even though src is a symlink the destination will end up being a file
+  copy: src=/backups/{{ item.NAME }}-latest.dump.xz dest=/backups/{{ item.NAME }}-{{ ansible_date_time.date }}.dump.xz mode=0755
+  # will this fail if the playbook is run just before midnight ansible time, or is ansible_date_time a constance throughout the playbook?
+  #creates: /backups/{{ item.NAME }}-{{ ansible_date_time.date }}.dump.xz
+  with_items: databases
+
+- name: Link to the backup-up database files
+  shell: rm -f /backups/{{ item.NAME }}-latest.dump.xz; ln -s /backups/{{ item.NAME }}-{{ ansible_date_time.date }}.dump.xz /backups/{{ item.NAME }}-latest.dump.xz
+  sudo_user: postgres
+  sudo: yes
+  # this will fail if the playbook is run just before midnight ansible time
+  #creates: /backups/{{ item.NAME }}-latest.dump.xz
+  with_items: databases
+
 - name: Set up some cronjobs to backup databases as configured
   template: >
     src=cron-backup-database
-    dest=/etc/cron.d/cron-backup-database-{{ item }}
-  with_items:
-    - "{{ dbs_to_backup }}"
+    dest=/etc/cron.d/cron-backup-database-{{ item.NAME }}
+  with_items: databases
   when: dbs_to_backup != []
   tags:
     - cron
@@ -61,18 +75,24 @@
   tags:
     - running
 
-- name: Ensure databases {{ db_names }} are created
+- name: "Ensure {{ databases | length }} databases are created"
   # sudo_user: "{{ postgres_sudo_user }}"
   # sudo_user: postgres
   # sudo: yes
-  postgresql_db: name={{ item }} state=present encoding='UTF-8' lc_collate='en_US.UTF-8' lc_ctype='en_US.UTF-8'
-  with_items: "{{ db_names }}"
+  postgresql_db: name=item.NAME state=present encoding='UTF-8' lc_collate='en_US.UTF-8' lc_ctype='en_US.UTF-8'
+  with_items: databases
   tags:
     - db
 
-- name: ensure user {{ db_user }} has access to these databases
-  action: postgresql_user db={{ item }} user={{ db_user }} password={{ db_password }} priv=ALL state=present
-  with_items: "{{ db_names }}"
+- name: ensure user item.USER has access to the item.NAME databases
+  action: postgresql_user db=item.NAME user=item.USER password=item.PASSWORD priv=ALL state=present
+  with_items: databases
+
+- name: "Populate {{ databases | length }} databases with the latest dump (backup) file(s)"
+  shell: /usr/local/bin/restore-database /backups/{{ item.NAME }}-{{ ansible_date_time.date }}.dump.xz
+  sudo_user: postgres
+  sudo: yes
+  with_items: databases
 
 
 # # sudo usermod -a -G dev,bigdata postgres
@@ -89,6 +109,6 @@
 
 # # - name: Ensure user does not have unnecessary privileges
 # #   sudo_user: "{{ postgres_sudo_user }}"
-# #   postgresql_user: name={{ db_user }}
+# #   postgresql_user: name={{ item.USER }}
 # #                    role_attr_flags=NOSUPERUSER,NOCREATEDB
 # #                    state=present

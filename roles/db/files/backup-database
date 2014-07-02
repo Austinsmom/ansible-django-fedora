@@ -1,7 +1,34 @@
 #!/usr/bin/env bash
 # Backup a database *locally* to /backups/.
 
+# filename extension expected for pg_dump output scripts (e.g. "dump" or "pg" or "sql" or "pgsql" or "psql")
+EXT=".psql"
+XZ_EXT=""
+# pg_dump format option: plain (sql) or custom (binary)
+DUMP_FORMAT="custom"
+
 DB=$1
 
+
+# If you don't first change to the /tmp directory, then you may not be able to cd to the directory you are already in! 
+# e.g.: could not change directory to "/home/Hobson": Permission denied
+mkdir -p /tmp
+OLDPWD=`pwd`
 cd /tmp
-/usr/bin/pg_dump -C $DB | /usr/bin/xz > /backups/$DB-$(date +%F).dump.xz
+
+mkdir -p /backups
+BACKUP_FILE="$DB-$(date +%F)$EXT$XZ_EXT"
+# can also do a pg_dump --clean to delete the old database, to avoid errors withn the database already exists during restore
+/usr/bin/pg_dump --create --format=$DUMP_FORMAT $DB | /usr/bin/xz > /backups/$BACKUP_FILE
+LATEST_LINK="/backups/$DB-latest$EXT$XZ_EXT"
+if [ -L "$LATEST_LINK" ]; then
+    rm -f "$LATEST_LINK"
+fi
+ln -s /backups/$BACKUP_FILE "$LATEST_LINK"
+
+# return to the directory you were in before (if you can!)
+if [ -d "$OLDPWD" ]; then
+    cd "$OLDPWD"   
+fi
+
+
