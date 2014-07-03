@@ -42,20 +42,24 @@
   with_items:
     - backup-database
     - restore-database
+    - backup-database-xz
+    - restore-database-xz
+    - backup-database-custom
+    - restore-database-custom
 
 - name: Copy over backed-up database file
   # even though src is a symlink the destination will end up being a file
-  copy: src=/backups/{{ item.NAME }}-latest.dump.xz dest=/backups/{{ item.NAME }}-{{ ansible_date_time.date }}.dump.xz mode=0755
+  copy: src=/backups/{{ item.NAME }}-latest{{ psql_ext }}{{ xz_ext }} dest=/backups/{{ item.NAME }}-{{ ansible_date_time.date }}{{ psql_ext }}{{ xz_ext }} mode=0755
   # will this fail if the playbook is run just before midnight ansible time, or is ansible_date_time a constance throughout the playbook?
-  #creates: /backups/{{ item.NAME }}-{{ ansible_date_time.date }}.dump.xz
+  #creates: /backups/{{ item.NAME }}-{{ ansible_date_time.date }}{{ psql_ext }}{{ xz_ext }}
   with_items: databases
 
 - name: Link to the backup-up database files
-  shell: rm -f /backups/{{ item.NAME }}-latest.dump.xz; ln -s /backups/{{ item.NAME }}-{{ ansible_date_time.date }}.dump.xz /backups/{{ item.NAME }}-latest.dump.xz
+  shell: rm -f /backups/{{ item.NAME }}-latest{{ psql_ext }}{{ xz_ext }}; ln -s /backups/{{ item.NAME }}-{{ ansible_date_time.date }}{{ psql_ext }}{{ xz_ext }} /backups/{{ item.NAME }}-latest{{ psql_ext }}{{ xz_ext }}
   sudo_user: postgres
   sudo: yes
   # this will fail if the playbook is run just before midnight ansible time
-  #creates: /backups/{{ item.NAME }}-latest.dump.xz
+  #creates: /backups/{{ item.NAME }}-latest{{ psql_ext }}{{ xz_ext }}
   with_items: databases
 
 - name: Set up some cronjobs to backup databases as configured

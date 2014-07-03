@@ -10,4 +10,4 @@ XZ_EXT=""
 DUMP_FORMAT="custom"
 
 
-source backup-database "$DB" "$EXT" "$XZ_EXT" "$DUMP_FORMAT" 
+source /usr/local/bin/backup-database "$DB" "$EXT" "$XZ_EXT" "$DUMP_FORMAT" 

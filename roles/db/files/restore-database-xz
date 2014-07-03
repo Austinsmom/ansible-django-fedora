@@ -10,4 +10,4 @@ XZ_EXT=".xz"
 DUMP_FORMAT="plain"
 
 
-source restore-database "$DB_PATH" "$EXT" "$XZ_EXT" "$DUMP_FORMAT" 
+source /usr/local/bin/restore-database "$DB_PATH" "$EXT" "$XZ_EXT" "$DUMP_FORMAT" 

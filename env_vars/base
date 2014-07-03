@@ -21,6 +21,12 @@ smtp_user: example.user.name@gmail.com
 dbs_to_backup:
   - djangodb
 
+# DRYUP: These variables are also defined in the scripts backup-database* and restore-database* which should be templated
+# extension for files containing binary or ascii postgresql scripts, including the dot
+psql_ext: '.psql'
+# extension for files containing compressed psql scripts (if empty, then file should not be compressed)
+xz_ext: '.xz'
+
 # service ports that don't need to be private:
 port_http_debug: 8000
 port_http: 80

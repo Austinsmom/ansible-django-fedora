@@ -41,14 +41,18 @@ if [ -f "$DB_PATH" ]; then
     # if XZ_EXT is not zero-length, then need to decompress before loading 
     if [ -n "$XZ_EXT" ]; then
         /usr/bin/unxz --keep --force "$DB_PATH"
+        echo /usr/bin/unxz --keep --force "$DB_PATH"
+        
         # /usr/bin/xzcat "$DB_PATH" | pgsql --set ON_ERROR_STOP=on # $DB_NAME
     fi
     # if the decompressed file doesn't exist then can't restore the database
     if [ -f "$DB_PATH_UNXZ" ]; then
         # there's no need to specify the database name if --create is specified in the pg_dump
         pg_restore "$DB_PATH_UNXZ"  # --dbname="$DB_NAME"
+        echo pg_restore "$DB_PATH_UNXZ"  # --dbname="$DB_NAME"
         # need to remove any uncompressed files, if they exist
         rm -f "$DB_PATH_UNXZ"
+        echo rm -f "$DB_PATH_UNXZ"
     else
         echo "ERROR: unable to find and restore a database dump file at \"$DB_PATH_UNXZ\""
     fi
