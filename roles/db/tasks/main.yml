@@ -89,7 +89,7 @@
   with_items: databases
 
 - name: "Populate {{ databases | length }} databases with the latest dump (backup) file(s)"
-  shell: /usr/local/bin/restore-database /backups/{{ item.NAME }}-{{ ansible_date_time.date }}.dump.xz
+  shell: /usr/local/bin/restore-database /backups/{{ item.NAME }}-latest.psql
   sudo_user: postgres
   sudo: yes
   with_items: databases

@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 # Backup a database *locally* to /backups/.
 
+DB="$1"
+
 # filename extension expected for pg_dump output scripts (e.g. "dump" or "pg" or "sql" or "pgsql" or "psql")
-EXT=".psql"
-XZ_EXT=""
+EXT="$2"
+XZ_EXT="$3"
 # pg_dump format option: plain (sql) or custom (binary)
-DUMP_FORMAT="custom"
-
-DB=$1
-
+DUMP_FORMAT="$4"
 
 # If you don't first change to the /tmp directory, then you may not be able to cd to the directory you are already in! 
 # e.g.: could not change directory to "/home/Hobson": Permission denied

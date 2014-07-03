@@ -1,12 +1,14 @@
 #!/bin/bash
 # Restore a database *locally* from /backups/.
 
+DB_PATH="$1"
 
-EXT=".psql"
-XZ_EXT=""
-DUMP_FORMAT="custom"
+# filename extension expected for pg_dump output scripts (e.g. "dump" or "pg" or "sql" or "pgsql" or "psql")
+EXT="$2"
+XZ_EXT="$3"
+# pg_dump format option: plain (sql) or custom (binary)
+DUMP_FORMAT="$4"
 
-DB_PATH=$1
 
 # If you don't first change to the /tmp directory, then you may not be able to cd to the directory you are already in! 
 # e.g.: could not change directory to "/home/Hobson": Permission denied
