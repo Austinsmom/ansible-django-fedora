@@ -1,0 +1,3 @@
+[submodule "roles/supervisor"]
+	path = roles/supervisor
+	url = git@github.com:Vinelab/ansible-supervisor
