@@ -11,6 +11,8 @@ XZ_EXT="$3"
 # pg_dump format option: plain (sql) or custom (binary)
 DUMP_FORMAT="$4"
 
+echo "DUMP_FORMAT = \"$DUMP_FORMAT\""
+
 # If you don't first change to the /tmp directory, then you may not be able to cd to the directory you are already in! 
 # e.g.: could not change directory to "/home/Hobson": Permission denied
 mkdir -p /tmp
@@ -18,18 +20,24 @@ OLDPWD=`pwd`
 cd /tmp
 
 mkdir -p /backups
-BACKUP_FILE="$DB-$(date +%F)$EXT$XZ_EXT"
+BACKUP_FILE="$DB-$(date +%F).$DUMP_FORMAT$EXT"
 # can also do a pg_dump --clean to delete the old database, to avoid errors withn the database already exists during restore
-/usr/bin/pg_dump --create --format=$DUMP_FORMAT $DB | /usr/bin/xz > /backups/$BACKUP_FILE
-LATEST_LINK="/backups/$DB-latest$EXT$XZ_EXT"
+echo /usr/bin/pg_dump --create --format=$DUMP_FORMAT $DB \> /backups/$BACKUP_FILE
+/usr/bin/pg_dump --create --format=$DUMP_FORMAT $DB > /backups/$BACKUP_FILE
+if [ "$XZ_EXT" ]; then
+    echo /usr/bin/xz /backups/$BACKUP_FILE \> /backups/$XZ_BACKUP_FILE
+    /usr/bin/xz /backups/$BACKUP_FILE > "/backups/$BACKUP_FILE$XZ_EXT"
+fi
+LATEST_LINK="/backups/$DB-latest.$DUMP_FORMAT$EXT$XZ_EXT"
 if [ -L "$LATEST_LINK" ]; then
     rm -f "$LATEST_LINK"
+    echo rm -f "$LATEST_LINK"
 fi
 ln -s "/backups/$BACKUP_FILE" "$LATEST_LINK"
 
 # return to the directory you were in before (if you can!)
 if [ -d "$OLDPWD" ]; then
-    cd "$OLDPWD"   
+    cd "$OLDPWD"
 fi
 
 

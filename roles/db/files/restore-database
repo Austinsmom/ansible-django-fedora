@@ -20,39 +20,52 @@ cd /tmp
 if [ -L "$DB_PATH" ]; then
     DB_PATH=`readlink -f "$DB_PATH"`
 # if the specified database is a symlink in the /backups folder, then dereference it
-elif [ -L /backups/$DB_PATH-latest$EXT$XZ_EXT ]; then
-    DB_PATH=`readlink -f "/backups/$DB_PATH-latest$EXT$XZ_EXT"`
+elif [ -L /backups/$DB_PATH-latest.$DUMP_FORMAT$EXT$XZ_EXT ]; then
+    DB_PATH=`readlink -f "/backups/$DB_PATH-latest.$DUMP_FORMAT$EXT$XZ_EXT"`
 # if the specified database is the prefix of a file named $DB-lastest in the /backups folder, then use it
-elif [ -f "/backups/$DB_PATH-latest$EXT$XZ_EXT" ]; then
-    DB_PATH="/backups/$DB_PATH-latest$EXT$XZ_EXT"
+elif [ -f "/backups/$DB_PATH-latest.$DUMP_FORMAT$EXT$XZ_EXT" ]; then
+    DB_PATH="/backups/$DB_PATH-latest.$DUMP_FORMAT$EXT$XZ_EXT"
 fi
+
+
+echo "DB_PATH = \"$DB_PATH\"."
 
 # deconstruct the file path to get various file names and paths (uncompressed, database name, -latest symlink, etc)
 DB_PATH_UNXZ=${DB_PATH%$XZ_EXT}
 DB_FILE_UNXZ=${DB_PATH_UNXZ##*/}
+DB_FILE_FORMAT=$([ "${DB_FILE_UNXZ/.custom.}" == "$DB_FILE_UNXZ" ] && echo "plain" || echo "custom")
 DB_FILE=${DB_PATH##*/}
-DB_BASENAME=${DB_FILE%$EXT$XZ_EXT}
+DB_BASENAME=${DB_FILE%.$DUMP_FORMAT$EXT$XZ_EXT}
 DB_NAME=${DB_BASENAME%-latest}
 DB_NAME=${DB_NAME%%-????-??-??}
+
+echo "DB_PATH = \"$DB_PATH_UNXZ\"."
 
 echo "Database Name appears to be \"$DB_NAME\"."
 
 if [ -f "$DB_PATH" ]; then
     # if XZ_EXT is not zero-length, then need to decompress before loading 
-    if [ -n "$XZ_EXT" ]; then
+    if [ "$XZ_EXT" ]; then
         /usr/bin/unxz --keep --force "$DB_PATH"
         echo /usr/bin/unxz --keep --force "$DB_PATH"
-        
         # /usr/bin/xzcat "$DB_PATH" | pgsql --set ON_ERROR_STOP=on # $DB_NAME
     fi
     # if the decompressed file doesn't exist then can't restore the database
     if [ -f "$DB_PATH_UNXZ" ]; then
-        # there's no need to specify the database name if --create is specified in the pg_dump
-        pg_restore "$DB_PATH_UNXZ"  # --dbname="$DB_NAME"
-        echo pg_restore "$DB_PATH_UNXZ"  # --dbname="$DB_NAME"
+        # need to use psql or pg_restore depending on the file format indicated by the file extension
+        if [ "$DB_FILE_FORMAT" == "custom" ]; then
+            # there's no need to specify the database name if --create is specified in the pg_dump
+            pg_restore "$DB_PATH_UNXZ" 1> /dev/null  # WARNING: will get python MemoryError if you don't mute all the pg_restore verbosity (entire file streamed to stdout!)
+            echo pg_restore "$DB_PATH_UNXZ"  # --dbname="$DB_NAME"
+        elif [ "$DB_FILE_FORMAT" == "plain" ]; then
+            psql -f "$DB_PATH_UNXZ" 1> /dev/null
+            echo psql -f "$DB_PATH_UNXZ"
+        fi
         # need to remove any uncompressed files, if they exist
-        rm -f "$DB_PATH_UNXZ"
-        echo rm -f "$DB_PATH_UNXZ"
+        if [ "$DB_PATH_UNXZ" != "$DB_PATH" ]; then
+            rm -f "$DB_PATH_UNXZ"
+            echo rm -f "$DB_PATH_UNXZ"
+        fi
     else
         echo "ERROR: unable to find and restore a database dump file at \"$DB_PATH_UNXZ\""
     fi

@@ -49,7 +49,6 @@
     - python-devel
     - python-pycurl
     - ipython
-    - supervisor
   tags: packages
 
 - name: Install latest (non-yum) pip as well as ansible (on the ansible node vm!)
@@ -64,6 +63,7 @@
   with_items:
     - virtualenv
     - virtualenvwrapper
+    - supervisor
 #    - newrelic
   tags: pip-packages
 

@@ -46,21 +46,24 @@
     - restore-database-xz
     - backup-database-custom
     - restore-database-custom
+  tags:
+    - db-dump
 
 - name: Copy over backed-up database file
   # even though src is a symlink the destination will end up being a file
+  # FIXME: Gives the new file today's date even though it might have been from an earlier backup!
   copy: src=/backups/{{ item.NAME }}-latest{{ psql_ext }}{{ xz_ext }} dest=/backups/{{ item.NAME }}-{{ ansible_date_time.date }}{{ psql_ext }}{{ xz_ext }} mode=0755
-  # will this fail if the playbook is run just before midnight ansible time, or is ansible_date_time a constance throughout the playbook?
-  #creates: /backups/{{ item.NAME }}-{{ ansible_date_time.date }}{{ psql_ext }}{{ xz_ext }}
   with_items: databases
+  tags:
+    - db-dump
 
-- name: Link to the backup-up database files
+- name: Link to the backed-up database files
   shell: rm -f /backups/{{ item.NAME }}-latest{{ psql_ext }}{{ xz_ext }}; ln -s /backups/{{ item.NAME }}-{{ ansible_date_time.date }}{{ psql_ext }}{{ xz_ext }} /backups/{{ item.NAME }}-latest{{ psql_ext }}{{ xz_ext }}
   sudo_user: postgres
   sudo: yes
-  # this will fail if the playbook is run just before midnight ansible time
-  #creates: /backups/{{ item.NAME }}-latest{{ psql_ext }}{{ xz_ext }}
   with_items: databases
+  tags:
+    - db-dump
 
 - name: Set up some cronjobs to backup databases as configured
   template: >
@@ -93,10 +96,12 @@
   with_items: databases
 
 - name: "Populate {{ databases | length }} databases with the latest dump (backup) file(s)"
-  shell: /usr/local/bin/restore-database /backups/{{ item.NAME }}-latest.psql
+  shell: /usr/local/bin/restore-database-custom /backups/{{ item.NAME }}-latest{{ psql_ext }}
   sudo_user: postgres
   sudo: yes
   with_items: databases
+  tags:
+    - data
 
 
 # # sudo usermod -a -G dev,bigdata postgres

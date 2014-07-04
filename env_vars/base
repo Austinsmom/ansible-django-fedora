@@ -1,4 +1,10 @@
 ---
+# Before this will work, you must:
+# 1. ssh to each of the remote servers and:
+#    a. sudo su && ssh-keygen && more ~/.ssh/id_rsa.pub
+#    b. copy the public key text and paste it into the stash repo keys at
+#       http://stash.sharplabs.com:7990/plugins/servlet/ssh/projects/SASBD/repos/ssg/keys
+#    c. /usr/bin/git ls-remote ssh://git@stash.sharplabs.com:7999/sasbd/ssg.git
 git_repo: ssh://git@stash.sharplabs.com:7999/sasbd/ssg.git
 
 project_name: bigdata
@@ -22,10 +28,11 @@ dbs_to_backup:
   - djangodb
 
 # DRYUP: These variables are also defined in the scripts backup-database* and restore-database* which should be templated
+# DRYUP: Consolidate these two extensions into one string and use it as a switch to select the backup/restore scripts to run/cron?
 # extension for files containing binary or ascii postgresql scripts, including the dot
-psql_ext: '.psql'
+psql_ext: '.custom.psql'
 # extension for files containing compressed psql scripts (if empty, then file should not be compressed)
-xz_ext: '.xz'
+xz_ext: '' # '.xz'
 
 # service ports that don't need to be private:
 port_http_debug: 8000
