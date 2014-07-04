@@ -1,0 +1,13 @@
+#!/bin/bash
+# Backup a database *locally* to /backups/.
+
+DB_PATH=$1
+
+# filename extension expected for pg_dump output scripts (e.g. "dump" or "pg" or "sql" or "pgsql" or "psql")
+EXT=".psql"
+XZ_EXT=""
+# pg_dump format option: plain (sql) or custom (binary)
+DUMP_FORMAT="custom"
+
+
+source /usr/local/bin/restore-database "$DB_PATH" "$EXT" "$XZ_EXT" "$DUMP_FORMAT" 

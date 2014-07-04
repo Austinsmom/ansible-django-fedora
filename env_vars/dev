@@ -1,9 +1,9 @@
 ---
 
-# Database settings.
+# Database settings. Used to set environment variables for e.g. heroku.
+# DRYUP: make these the same as in the private databases.NAME/USER vars and sed settings.py to make sure they are the same
 db_user: "{{ application_name }}"
 db_name: "{{ application_name }}"
-
 
 # Gunicorn settings. For the number of workers, a good rule to follow is
 # 2 x number of CPUs + 1
@@ -14,17 +14,10 @@ gunicorn_num_workers: 3
 # when developing. Set to 0 for unlimited requests (default).
 gunicorn_max_requests: 0
 
-
 # Nginx settings.
 nginx_server_name: "{{ inventory_hostname }}"
 ssl_src_dir: ssl_self_signed
 ssl_dest_dir: /etc/ssl
-
-
-# SMTP settings.
-smtp_host: smtp.gmail.com
-smtp_user: server.sharplabs@gmail.com
-
 
 # Application bigdata
 django_settings_file: settings
@@ -32,4 +25,4 @@ django_settings_file: settings
 run_django_syncdb: yes
 run_django_south_migration: no
 run_django_collectstatic: yes
-# run_bower_install: yes
+run_bower_install: yes

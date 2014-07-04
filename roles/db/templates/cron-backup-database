@@ -6,4 +6,4 @@
 # │ └───────────── hour (0 - 23)
 # └───────────────── min (0 - 59)
 # run once a week on sunday morning at 1:11 am
-11 1 * * 0 postgres /usr/local/bin/backup-database {{ item }}
+11 1 * * 0 postgres /usr/local/bin/backup-database-custom {{ item }}
