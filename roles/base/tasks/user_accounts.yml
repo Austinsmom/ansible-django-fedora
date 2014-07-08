@@ -1,0 +1,30 @@
+---
+- name: Add remote users
+  user:
+    name="{{ item.name }}"
+    password="{{ item.password_hashed }}"
+  with_items:
+  - "{{ users }}"
+  when: users != []
+  tags:
+  - bootstrap
+  - credentials
+  - setup
+
+- name: Add SSH public key to remote users
+  authorized_key:
+    user="{{ item.name }}"
+    key="{{ lookup('file', {{ item.public_key_path }}) }}"
+  with_items:
+  - "{{ users }}"
+  when: users != []
+
+- name: Add remote users to sudoers
+  lineinfile:
+    "dest=/etc/sudoers
+    regexp='^{{ item.name }} ALL'
+    line='{{ item.name }} ALL=(ALL) NOPASSWD: ALL'
+    state=present"
+  with_items:
+  - "{{ users }}"
+  when: users != []
