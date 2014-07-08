@@ -1,0 +1,11 @@
+---
+- name: generate random salt string for md5 password hashing in fedora
+  shell: python -c "import string,random; print ''.join(random.choice(string.letters + string.numbers  + '.' + '/') for _ in xrange(8));"
+  register: random_salt
+  tags:
+    - credentials
+
+- name: set facts for future roles
+  set_fact:
+    random_salt_1: '{{random_salt.stdout}}'
+    random_salt_2: '{{random_salt.stdout}}'
