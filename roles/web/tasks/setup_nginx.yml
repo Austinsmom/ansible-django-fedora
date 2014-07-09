@@ -31,17 +31,26 @@
 
 - name: create nginx configuration file
   template: src=nginx_site_config.j2
-            dest=/etc/nginx/sites-available/{{ application_name }}
+            dest=/etc/nginx/sites-available/{{ application_name }}.conf
             backup=yes
+
+- name: include sites-enabled/*.conf in nginx.conf
+  lineinfile:
+    dest=/etc/nginx/nginx.conf
+    line="    include /etc/nginx/sites-enabled/*;"
+    insertbefore="^\s*include\s/etc/nginx/conf"
+    state=present
+  # notify:
+  #   - restart nginx
 
 - name: disable default nginx site
   command: rm /etc/nginx/sites-enabled/default
            removes=/etc/nginx/sites-enabled/default
 
 - name: enable application nginx site
-  command: ln -s /etc/nginx/sites-available/{{ application_name }}
-           /etc/nginx/sites-enabled/{{ application_name }}
-           creates=/etc/nginx/sites-enabled/{{ application_name }}
+  command: ln -s /etc/nginx/sites-available/{{ application_name }}.conf
+           /etc/nginx/sites-enabled/{{ application_name }}.conf
+           creates=/etc/nginx/sites-enabled/{{ application_name }}.conf
 
 - name: start nginx
   service: name=nginx state=started enabled=yes
