@@ -11,12 +11,12 @@ project_name: bigdata
 application_name: bigdata
 
 # Application bigdata
-django_settings_file: settings
+django_settings_file: bigdata.settings
 
 run_django_syncdb: yes
-run_django_south_migration: no
+run_django_south_migration: yes
 run_django_collectstatic: yes
-# run_bower_install: yes
+run_bower_install: yes
 
 # SMTP settings.
 smtp_host: smtp.gmail.com

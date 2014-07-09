@@ -19,7 +19,7 @@ ssl_src_dir: ssl_self_signed
 ssl_dest_dir: /etc/ssl
 
 # Application bigdata
-django_settings_file: settings
+django_settings_file: bigdata.settings
 
 run_django_syncdb: yes
 run_django_south_migration: no

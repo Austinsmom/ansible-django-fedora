@@ -1,17 +1,14 @@
 ---
-
-- name: "Deploy nginx+gunicorn+django webapp called {{ application_name }}"
+- name: "deploy django webapp {{ application_name }}"
   hosts: webservers
   sudo_user: "{{ sudo_user }}"
   remote_user: "{{ remote_user }}"
-  vars:
-    - setup_git_repo: yes
   vars_files:
     - env_vars/base
     - private/vars.yml
     - env_vars/dev
 
   roles:
-    # - base
-    - supervisor
+    - base
+    #- supervisor
     - web

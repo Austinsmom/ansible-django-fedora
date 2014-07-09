@@ -1,5 +1,5 @@
 ---
-- name: Create the /etc/supervisord.conf config file
+- name: create /etc/supervisord.conf
   shell: echo_supervisord_conf > /etc/supervisord.conf; mkdir -p /etc/supervisor/conf.d/
   sudo: yes
 
@@ -8,9 +8,24 @@
             backup=yes
             dest=/etc/supervisor/conf.d/{{ application_name }}.conf
 
+- name: stop supervisord
+  service: name=supervisord state=stopped enabled=yes
 
-- name: Re-read the Supervisor config files
-  command: supervisorctl reread
+# - name: reread the supervisord config files
+#   command: supervisorctl reread
 
-- name: Update Supervisor to add the app in the process group
+- name: start supervisord
+  service: name=supervisord state=started enabled=yes
+
+- name: update supbervisord to add the new app
   command: supervisorctl update
+
+# - name: add programs to process group
+#   shell: supervisorctl add {{item.name}}
+#   when: supervisor.programs is defined
+#   with_items: supervisor.programs
+
+# - name: change supervisord programs states
+#   shell: supervisorctl start {{item.name}}
+#   when: supervisor.programs is defined
+#   with_items: supervisor.programs
