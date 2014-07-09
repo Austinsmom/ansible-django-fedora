@@ -18,11 +18,6 @@ run_django_south_migration: yes
 run_django_collectstatic: yes
 run_bower_install: yes
 
-# SMTP settings.
-smtp_host: smtp.gmail.com
-smtp_user: example.user.name@gmail.com
-
-
 # dbs_to_backup: []
 dbs_to_backup:
   - djangodb
@@ -40,6 +35,16 @@ sudoers_path: private/files/sudoers/
 # service ports that don't need to be private:
 port_http_debug: 8000
 port_http: 80
+
+ssl_src_dir: private/files/ssl_self_signed
+ssl_dest_dir: /etc/ssl
+ssl_cert_country: US
+ssl_cert_state: Washington
+ssl_cert_city: Camas
+ssl_cert_fqdn: lte.enet.sharplabs.com
+ssl_cert_email: laneh@sharplabs.com
+ssl_cert_organization: Sharp Labs of America
+ssl_cert_subject: /C=US/ST=Washington/L=Camas/O=Sharp Labs of America/CN=lte.enet.sharplabs.com/emailAddress=laneh@sharplabs.com
 
 
 ################# PRIVATE #################
@@ -61,6 +66,8 @@ databases:
 db_password: plain_text_password
 db_name: database_name_within_postgres_server
 ssl_key_password: plain_text_password
+
+# SMTP settings.
 smtp_host: your.mail.service.com
 smtp_user: your_user_name@mail.service.com
 smtp_password: your_email_account_password
