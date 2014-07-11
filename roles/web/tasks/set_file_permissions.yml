@@ -1,9 +1,44 @@
 ---
 
-- name: Ensure that the application file permissions are set properly
-  file: path={{ virtualenv_path }}
+- name: set app file tree permissions
+  file: path={{ item }}
         recurse=yes
         owner={{ gunicorn_user }}
-        group={{ gunicorn_group }}
+        group={{ webapps_group }}
         state=directory
-  notify: restart application
+        mode=0774
+  with_items:
+  - "{{ virtualenv_path }}"
+  - "{{ application_log_dir }}"
+
+- name: set webapps directory permissions
+  file: path={{ webapps_path }}
+        recurse=no
+        owner=root
+        group=root
+        state=directory
+        mode=0775
+
+- name: set app directory permissions
+  file: path={{ virtualenv_path }}
+        recurse=no
+        owner={{ gunicorn_user }}
+        group={{ gunicorn_user }}
+        state=directory
+        mode=0775
+
+# - name: set log directory permissions
+#   file: path={{ application_log_dir }}
+#         recurse=no
+#         owner={{ gunicorn_user }}
+#         group={{ webapps_group }}
+#         state=directory
+#         mode=0777
+#   notify: restart application
+
+# - name: create the application log folder
+#   file: path={{ application_log_dir }}
+#         owner={{ gunicorn_user }}
+#         group={{ webapps_group }}
+#         mode=0774
+#         state=directory

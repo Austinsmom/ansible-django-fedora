@@ -1,19 +1,13 @@
 ---
-
-- name: "Install postgressql+nginx+django for a production {{ application_name }} webapp"
+- name: install and configure all website services 
   hosts: dbservers
   sudo_user: "{{ sudo_user }}"
   remote_user: "{{ remote_user }}"
-  vars:
-    - setup_git_repo: yes
-    #- update_apt_cache: yes
   vars_files:
     - env_vars/base
     - private/vars.yml
-    #- env_vars/dev
-
   roles:
     - base
     - db
+    - supervisor
     - web
-    #- postgresql_server

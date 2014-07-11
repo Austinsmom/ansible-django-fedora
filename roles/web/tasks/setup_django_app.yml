@@ -43,6 +43,7 @@
          && . {{ virtualenv_path }}/bin/postactivate
          && cd {{ application_path }}
          && yes | python manage.py bower install -- --quiet --allow-root 
+  when: run_bower_install
 
 # - name: manage.py bower install
 #   django_manage: command="bower install -- --allow-root"

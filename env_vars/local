@@ -15,7 +15,7 @@ gunicorn_max_requests: 1
 
 # Nginx settings. 
 nginx_server_name: localhost
-ssl_src_dir: ssl_self_signed
+ssl_src_dir: private/files/ssl_self_signed
 ssl_dest_dir: /etc/ssl
 
 # Application bigdata

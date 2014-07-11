@@ -3,7 +3,7 @@
   shell: echo_supervisord_conf > /etc/supervisord.conf; mkdir -p /etc/supervisor/conf.d/
   sudo: yes
 
-- name: Create Supervisor config files for each application?
+- name: create webapp supervisor config
   template: src=supervisor_config.j2
             backup=yes
             dest=/etc/supervisor/conf.d/{{ application_name }}.conf
@@ -11,14 +11,17 @@
 - name: stop supervisord
   service: name=supervisord state=stopped enabled=yes
 
-# - name: reread the supervisord config files
-#   command: supervisorctl reread
-
 - name: start supervisord
   service: name=supervisord state=started enabled=yes
 
+# supervisorctl requires that supervisord be running!
+- name: reread the supervisord config files
+  command: supervisorctl reread
+
 - name: update supbervisord to add the new app
   command: supervisorctl update
+
+
 
 # - name: add programs to process group
 #   shell: supervisorctl add {{item.name}}

@@ -10,6 +10,9 @@
     state=present
     password="{{ item.password_hashed }}"
     groups="{{ item.groups }}"
+    shell=/bin/bash
+    system="{{ item.system }}"
+    append=yes
 #    append=yes
   with_items:
   - "{{ users }}"

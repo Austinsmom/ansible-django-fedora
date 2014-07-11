@@ -11,23 +11,25 @@
 # this generates a new, unencrypted self-signed certificate
 - name: generate ssl certificate on the remote server
   command: openssl req -new -newkey rsa:4096 -days 3653 -nodes -x509 
-                   -subj {{ ssl_cert_subject }}
-                   -keyout {{ ssl_cert_fqdn }}.key
-                   -out {{ ssl_cert_fqdn }}.cert
+                   -subj "{{ssl_cert_subject}}"
+                   -keyout "{{ ssl_cert_fqdn }}.key"
+                   -out "{{ ssl_cert_fqdn }}.cert"
 
-- name: Copy the SSL cert and key to the remote server
-  copy: src={{ ssl_src_dir }}/ dest={{ ssl_dest_dir }}
+- name: copy SSL cert to remote server
+  copy: src="{{ ssl_src_dir }}/" dest="{{ ssl_dest_dir }}"
 
-- name: Decrypt the SSL key
-  command: sudo openssl rsa 
-           -in {{ ssl_dest_dir }}/nginx.key.encrypted_with_passphrase
-           -out {{ ssl_dest_dir }}/nginx.key
-           -k {{ ssl_key_password }}
-  # openssl aes-256-cbc -salt -a -d -in {{ ssl_dest_dir }}/nginx.key
-  #          -out {{ ssl_dest_dir }}/nginx.decrypted.key -k {{ ssl_key_password }}
-  #          creates={{ ssl_dest_dir }}/nginx.decrypted.key
+- name: decrypt ssl cert
+  command: openssl rsa
+           -in "{{ ssl_dest_dir }}/nginx.key.encrypted_with_passphrase"
+           -out "{{ ssl_dest_dir }}/nginx.decrypted.key"
+           -passin file:"{{ ssl_dest_dir }}/.pp"
+    creates="{{ ssl_dest_dir }}/nginx.decrypted.key"
 
-- name: Rename the decrypted SSL key
+- name: remove password file
+  command: rm "{{ ssl_dest_dir }}/.pp"
+    removes="{{ ssl_dest_dir }}/.pp"
+
+- name: rename the decrypted ssl key
   command: mv {{ ssl_dest_dir }}/nginx.decrypted.key {{ ssl_dest_dir }}/nginx.key
            removes={{ ssl_dest_dir }}/nginx.decrypted.key
 
@@ -36,7 +38,6 @@
   with_items:
   - "/etc/nginx/sites-available"
   - "/etc/nginx/sites-enabled"
-  - "{{ application_log_dir }}"
   - "{{ nginx_static_dir }}" 
   - "{{ nginx_media_dir }}" 
 
@@ -44,6 +45,23 @@
   template: src=nginx_site_config.j2
             dest=/etc/nginx/sites-available/{{ application_name }}.conf
             backup=yes
+
+# - name: add nginx log files
+#   command: touch {{ item }}
+#            creates={{ item }}
+#   with_items:
+#   - "{{ nginx_access_log_file }}"
+#   - "{{ nginx_error_log_file }}"
+
+# - name: set log file permissions
+#   file: path={{ item }}
+#         owner=nginx
+#         group={{ webapps_group }}
+#         state=file
+#         mode=0777
+#   with_items:
+#   - "{{ nginx_access_log_file }}"
+#   - "{{ nginx_error_log_file }}"
 
 - name: include sites-enabled/*.conf in nginx.conf
   lineinfile:
@@ -64,4 +82,4 @@
            creates=/etc/nginx/sites-enabled/{{ application_name }}.conf
 
 - name: start nginx
-  service: name=nginx state=started enabled=yes
+  service: name=nginx state=restarted enabled=yes

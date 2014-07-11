@@ -6,9 +6,7 @@
   vars_files:
     - env_vars/base
     - private/vars.yml
-    - env_vars/dev
 
   roles:
     - base
-    #- supervisor
     - web

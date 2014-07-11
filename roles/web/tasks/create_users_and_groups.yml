@@ -1,10 +1,21 @@
 ---
 
-- name: Create the application user
-  user: name={{ gunicorn_user }} state=present
+#sudo groupadd --system bigdata
+- name: create webapp group
+  group: name={{ webapps_group }} system=yes state=present
 
-- name: Create the application group
-  group: name={{ gunicorn_group }} system=yes state=present
+# sudo groupadd --system webapps
+- name: create webapps group
+  group: name={{ webapps_group }} system=yes state=present
 
-- name: Add the application user to the application group
-  user: name={{ gunicorn_user }} group={{ gunicorn_group }} state=present
+# sudo useradd --system --gid webapps --shell /bin/bash --home /webapps/bigdata bigdata
+- name: create webapp user
+  user: name={{ gunicorn_user }}
+        system=yes state=present
+        groups={{ webapps_group }},{{ gunicorn_user }}
+        home={{ virtualenv_path }}
+        append=yes
+#        move_home=yes
+
+- name: add nginx user to the webapp group
+  user: name=nginx groups="{{ webapps_group }},nginx" state=present append=yes

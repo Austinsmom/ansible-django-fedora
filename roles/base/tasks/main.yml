@@ -120,6 +120,12 @@
     - pip
     - python
 
+- name: pip install setproctitle
+  pip: name=supervisor state=latest
+  tags:
+    - pip
+    - python
+
 - name: pip install ipython
   pip: name=ipython state=latest
   tags:
