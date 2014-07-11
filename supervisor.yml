@@ -1,0 +1,12 @@
+---
+- name: "deploy django webapp {{ application_name }}"
+  hosts: webservers
+  sudo_user: "{{ sudo_user }}"
+  remote_user: "{{ remote_user }}"
+  vars_files:
+    - env_vars/base
+    - roles/web/vars/main.yml
+    - private/vars.yml
+  roles:
+    #- base
+    - supervisor
