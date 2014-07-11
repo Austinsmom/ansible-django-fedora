@@ -1,38 +1,85 @@
 ---
 
-- name: Install Nginx
+- name: install nginx
 #  apt: name=nginx update_cache={{ update_apt_cache }} state=installed
   yum: name=nginx state=installed
   tags: packages
 
-- name: Enure that the Nginx service is stopped
+- name: stop nginx
   service: name=nginx state=stopped
 
-- name: Copy the SSL cert and key to the remote server
-  copy: src={{ ssl_src_dir }}/ dest={{ ssl_dest_dir }}
+# this generates a new, unencrypted self-signed certificate
+- name: generate ssl certificate on the remote server
+  command: openssl req -new -newkey rsa:4096 -days 3653 -nodes -x509 
+                   -subj "{{ssl_cert_subject}}"
+                   -keyout "{{ ssl_cert_fqdn }}.key"
+                   -out "{{ ssl_cert_fqdn }}.cert"
 
-- name: Decrypt the SSL key
-  command: openssl aes-256-cbc -salt -a -d -in {{ ssl_dest_dir }}/nginx.key
-           -out {{ ssl_dest_dir }}/decrypted.key -k {{ ssl_key_password }}
-           creates={{ ssl_dest_dir }}/decrypted.key
+- name: copy SSL cert to remote server
+  copy: src="{{ ssl_src_dir }}/" dest="{{ ssl_dest_dir }}"
 
-- name: Rename the decrypted SSL key
-  command: mv {{ ssl_dest_dir }}/decrypted.key {{ ssl_dest_dir }}/nginx.key
-           removes={{ ssl_dest_dir }}/decrypted.key
+- name: decrypt ssl cert
+  command: openssl rsa
+           -in "{{ ssl_dest_dir }}/nginx.key.encrypted_with_passphrase"
+           -out "{{ ssl_dest_dir }}/nginx.decrypted.key"
+           -passin file:"{{ ssl_dest_dir }}/.pp"
+    creates="{{ ssl_dest_dir }}/nginx.decrypted.key"
 
-- name: Create the Nginx configuration file
+- name: remove password file
+  command: rm "{{ ssl_dest_dir }}/.pp"
+    removes="{{ ssl_dest_dir }}/.pp"
+
+- name: rename the decrypted ssl key
+  command: mv {{ ssl_dest_dir }}/nginx.decrypted.key {{ ssl_dest_dir }}/nginx.key
+           removes={{ ssl_dest_dir }}/nginx.decrypted.key
+
+- name: add required nginx directories
+  file: dest="{{ item }}" state=directory
+  with_items:
+  - "/etc/nginx/sites-available"
+  - "/etc/nginx/sites-enabled"
+  - "{{ nginx_static_dir }}" 
+  - "{{ nginx_media_dir }}" 
+
+- name: create nginx configuration file
   template: src=nginx_site_config.j2
-            dest=/etc/nginx/sites-available/{{ application_name }}
+            dest=/etc/nginx/sites-available/{{ application_name }}.conf
             backup=yes
 
-- name: Ensure that the default site is disabled
+# - name: add nginx log files
+#   command: touch {{ item }}
+#            creates={{ item }}
+#   with_items:
+#   - "{{ nginx_access_log_file }}"
+#   - "{{ nginx_error_log_file }}"
+
+# - name: set log file permissions
+#   file: path={{ item }}
+#         owner=nginx
+#         group={{ webapps_group }}
+#         state=file
+#         mode=0777
+#   with_items:
+#   - "{{ nginx_access_log_file }}"
+#   - "{{ nginx_error_log_file }}"
+
+- name: include sites-enabled/*.conf in nginx.conf
+  lineinfile:
+    dest=/etc/nginx/nginx.conf
+    line="    include /etc/nginx/sites-enabled/*;"
+    insertbefore="^\s*include\s/etc/nginx/conf"
+    state=present
+  # notify:
+  #   - restart nginx
+
+- name: disable default nginx site
   command: rm /etc/nginx/sites-enabled/default
            removes=/etc/nginx/sites-enabled/default
 
-- name: Ensure that the application site is enabled
-  command: ln -s /etc/nginx/sites-available/{{ application_name }}
-           /etc/nginx/sites-enabled/{{ application_name }}
-           creates=/etc/nginx/sites-enabled/{{ application_name }}
+- name: enable application nginx site
+  command: ln -s /etc/nginx/sites-available/{{ application_name }}.conf
+           /etc/nginx/sites-enabled/{{ application_name }}.conf
+           creates=/etc/nginx/sites-enabled/{{ application_name }}.conf
 
-- name: Ensure Nginx service is started
-  service: name=nginx state=started enabled=yes
+- name: start nginx
+  service: name=nginx state=restarted enabled=yes

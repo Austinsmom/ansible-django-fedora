@@ -10,19 +10,27 @@ git_repo: ssh://git@stash.sharplabs.com:7999/sasbd/ssg.git
 project_name: bigdata
 application_name: bigdata
 
-# Application bigdata
-django_settings_file: settings
+webapps_path: "/webapps"
+virtualenv_path: "{{ webapps_path }}/{{ application_name }}"
 
-run_django_syncdb: yes
+# Application bigdata
+django_settings_file: "{{ application_name }}.settings"
+run_django_syncdb: no
 run_django_south_migration: no
 run_django_collectstatic: yes
-# run_bower_install: yes
+run_bower_install: yes
+# Gunicorn settings. For the number of workers, a good rule to follow is
+# 2 x number of CPUs + 1
+gunicorn_num_workers: 3
+# Setting this to 1 will restart the Gunicorn process each time
+# you make a request, basically reloading the code. Very handy
+# when developing. Set to 0 for unlimited requests (default).
+gunicorn_max_requests: 1
+# Unix username:group of gunicorn process
+gunicorn_user: "{{ application_name }}"
 
-# SMTP settings.
-smtp_host: smtp.gmail.com
-smtp_user: example.user.name@gmail.com
-
-
+db_user: "{{ application_name }}"
+db_name: "{{ application_name }}"
 # dbs_to_backup: []
 dbs_to_backup:
   - djangodb
@@ -40,6 +48,22 @@ sudoers_path: private/files/sudoers/
 # service ports that don't need to be private:
 port_http_debug: 8000
 port_http: 80
+
+ssl_src_dir: private/files/ssl_self_signed
+ssl_dest_dir: /etc/ssl
+ssl_cert_country: US
+ssl_cert_state: Washington
+ssl_cert_city: Camas
+ssl_cert_fqdn: lte.enet.sharplabs.com
+ssl_cert_email: laneh@sharplabs.com
+ssl_cert_organization: "Sharp Labs of America"
+ssl_cert_subject: "/C=US/ST=Washington/L=Camas/O=Sharp Labs of America/CN=lte.enet.sharplabs.com/emailAddress=laneh@sharplabs.com"
+
+
+
+
+
+
 
 
 ################# PRIVATE #################
@@ -60,7 +84,8 @@ databases:
 # credentials stored in environment variables in a virtualenv for cloud services like heroku
 db_password: plain_text_password
 db_name: database_name_within_postgres_server
-ssl_key_password: plain_text_password
+
+# SMTP settings.
 smtp_host: your.mail.service.com
 smtp_user: your_user_name@mail.service.com
 smtp_password: your_email_account_password

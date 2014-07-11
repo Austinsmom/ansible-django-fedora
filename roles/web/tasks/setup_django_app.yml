@@ -1,9 +1,16 @@
 ---
+#pip install --allow-unverified pyodbc --allow-all-external pyodbc
+- name: pip install pyodbc
+  pip: virtualenv={{ virtualenv_path }} name=pyodbc extra_args='--allow-all-external --allow-unverified pyodbc'
 
-- name: Install packages required by the Django app inside virtualenv
-  pip: virtualenv={{ virtualenv_path }} requirements={{ requirements_file }}
+# this will take a long time to run, it compiles and links numpy, blas, lapack, etc
+- name: pip install scipy
+  pip: name=scipy virtualenv={{ virtualenv_path }}
 
-- name: Run the Django syncdb command
+- name: pip install django app requirements.txt
+  pip: virtualenv={{ virtualenv_path }} requirements={{ requirements_file }} extra_args='--allow-all-external --allow-unverified pyodbc --allow-unverified MDP --allow-unverified PIL'
+
+- name: run the django syncdb command
   shell: . {{ virtualenv_path }}/bin/activate
          && . {{ virtualenv_path }}/bin/postactivate
          && cd {{ application_path }}
@@ -11,7 +18,7 @@
   when: run_django_syncdb
   tags: django
 
-- name: Run Django South migrations
+- name: run manage.py migrate
   shell: . {{ virtualenv_path }}/bin/activate
          && . {{ virtualenv_path }}/bin/postactivate
          && cd {{ application_path }}
@@ -19,7 +26,29 @@
   when: run_django_south_migration
   tags: django
 
-- name: Run Django collectstatic
+- name: yum install npm
+  yum: name=npm
+
+- name: npm install bower
+  npm: name=bower global=yes
+
+# - name: bower install
+#   shell: . {{ virtualenv_path }}/bin/activate
+#          && . {{ virtualenv_path }}/bin/postactivate
+#          && cd {{ application_path }}
+#          && yes no | bower --quiet --allow-root install 
+
+- name: bower install
+  shell: . {{ virtualenv_path }}/bin/activate
+         && . {{ virtualenv_path }}/bin/postactivate
+         && cd {{ application_path }}
+         && yes | python manage.py bower install -- --quiet --allow-root 
+  when: run_bower_install
+
+# - name: manage.py bower install
+#   django_manage: command="bower install -- --allow-root"
+
+- name: run manage.py collectstatic
   shell: . {{ virtualenv_path }}/bin/activate
          && . {{ virtualenv_path }}/bin/postactivate
          && cd {{ application_path }}

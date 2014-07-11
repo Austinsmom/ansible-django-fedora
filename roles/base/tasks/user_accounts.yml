@@ -1,0 +1,39 @@
+---
+- name: Add remote groups
+  group: name={{ item }} state=present
+  with_items: "{{ linux_groups }}"
+  when: groups != []
+
+- name: Add remote users
+  user:
+    name="{{ item.name }}"
+    state=present
+    password="{{ item.password_hashed }}"
+    groups="{{ item.groups }}"
+    shell=/bin/bash
+    system="{{ item.system }}"
+    append=yes
+#    append=yes
+  with_items:
+  - "{{ users }}"
+  when: users != []
+  tags:
+  - bootstrap
+  - credentials
+  - setup
+
+- name: Add SSH public key to remote users
+  # this doesn't do anythin and acts like the key is blank (but file is not empty)
+  authorized_key:
+    user="{{ item.name }}"
+    key="{{lookup('file', item.public_key_path)}}"
+  with_items:
+  - "{{ users }}"
+  when: users != []
+
+# this is redundant with the wheel group added to the users above
+- name: Add remote users to sudoers
+  lineinfile: dest=/etc/sudoers regexp='^{{item.name}} ALL' line='{{item.name}} ALL=(ALL) NOPASSWD:ALL' state=present
+  with_items:
+  - "{{ users }}"
+  when: users != []

@@ -20,7 +20,7 @@
 - name: Initialize database
   command: service postgresql initdb creates=/var/lib/pgsql/data/postgresql.conf
 
-- name: Add our postgres config file.  # rather than doing a `service postgresql initdb`, just copy over the 2 config files
+- name: add postgres config file  # rather than doing a `service postgresql initdb`, just copy over the 2 config files
   copy: >
     src=private/files/{{ item }}
     dest=/var/lib/pgsql/data/{{ item }}
@@ -34,10 +34,10 @@
   tags:
     - config
 
-- name: Ensure postgres has a place to backup to
+- name: esure postgres has a place to backup to
   file: dest=/backups state=directory owner=postgres
 
-- name: Copy over backup and pg_dump and psql restore scripts
+- name: scp backup+restore scripts for postgres
   copy: src={{ item }} dest=/usr/local/bin/{{ item }} mode=0755
   with_items:
     - backup-database
@@ -47,25 +47,28 @@
     - backup-database-custom
     - restore-database-custom
   tags:
+    - data
     - db-dump
 
-- name: Copy over backed-up database file
+- name: scp backed-up database file
   # even though src is a symlink the destination will end up being a file
   # FIXME: Gives the new file today's date even though it might have been from an earlier backup!
   copy: src=/backups/{{ item.NAME }}-latest{{ psql_ext }}{{ xz_ext }} dest=/backups/{{ item.NAME }}-{{ ansible_date_time.date }}{{ psql_ext }}{{ xz_ext }} mode=0755
   with_items: databases
   tags:
+    - data
     - db-dump
 
-- name: Link to the backed-up database files
+- name: ln -s to backed-up database files
   shell: rm -f /backups/{{ item.NAME }}-latest{{ psql_ext }}{{ xz_ext }}; ln -s /backups/{{ item.NAME }}-{{ ansible_date_time.date }}{{ psql_ext }}{{ xz_ext }} /backups/{{ item.NAME }}-latest{{ psql_ext }}{{ xz_ext }}
   sudo_user: postgres
   sudo: yes
   with_items: databases
   tags:
+    - data
     - db-dump
 
-- name: Set up some cronjobs to backup databases as configured
+- name: set up cronjobs to backup databases
   template: >
     src=cron-backup-database
     dest=/etc/cron.d/cron-backup-database-{{ item.NAME }}
@@ -74,7 +77,7 @@
   tags:
     - cron
 
-- name: Ensure the PostgreSQL service is running
+- name: ensure postgres is running
   service: name=postgresql state=restarted enabled=yes
   #"{{ postgres_sudo_user }}"
   # sudo_user: postgres 
@@ -82,7 +85,7 @@
   tags:
     - running
 
-- name: "Ensure {{ databases | length }} databases are created"
+- name: "ensure {{ databases | length }} databases are created"
   # sudo_user: "{{ postgres_sudo_user }}"
   # sudo_user: postgres
   # sudo: yes
@@ -102,6 +105,7 @@
   with_items: databases
   tags:
     - data
+    - db-dump
 
 
 # # sudo usermod -a -G dev,bigdata postgres
