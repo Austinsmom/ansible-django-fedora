@@ -9,5 +9,6 @@
   roles:
     - base
     - db
+    - freetds
     - supervisor
     - web
