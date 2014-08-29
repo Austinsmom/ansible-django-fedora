@@ -1,0 +1,25 @@
+---
+
+- name: Install FreeTDS packages
+  yum: name={{ item }}  state=installed
+  with_items:
+    - unixODBC
+    - unixODBC-devel
+    - freetds-devel
+
+- name: copy /etc/freetds.conf for MS SQL server
+  copy:
+    dest=/etc/freetds.conf
+    src=files/freetds.conf
+    mode=644
+  tags:
+    - database
+    - MSSQLServer
+- name: copy /etc/odbcinst.ini for MS SQL server
+  copy:
+    dest=/etc/odbcinst.ini
+    src=files/odbcinst.ini
+    mode=644
+  tags:
+    - database
+    - MSSQLServer
