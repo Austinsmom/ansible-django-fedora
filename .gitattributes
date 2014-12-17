@@ -14,3 +14,4 @@ id_rsa*
 hosts
 inventory
 inventory/*
+roles/web/files/*.conf
