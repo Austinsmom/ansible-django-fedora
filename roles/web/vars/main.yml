@@ -3,6 +3,8 @@
 # Application settings.
 project_path: "{{ virtualenv_path }}/{{ project_name }}"
 application_path: "{{ project_path }}/{{ application_name }}"
+# what worked was: sudo chmod a+w /var/log/gunicorn && sudo chmod a+w /var/log/gunicorn/*
+# FIXME: Change this out from the virtualenv_path, to the system /vars/log/ path, I think
 application_log_dir: "{{ virtualenv_path }}/logs"
 application_log_file: "{{ application_log_dir }}/gunicorn_supervisor.log"
 requirements_file: "{{ application_path }}/requirements.txt"
@@ -13,6 +15,9 @@ webapps_group: webapps
 # Nginx settings
 nginx_http_port: 80
 nginx_https_port: 443
+# this should also be used in the /etc/supervisord.d/predict-prod.conf script for gunicorn (wsgi)
+# FIXME: put gunicorn supervisord conf files into this web role and perhaps, also the supervisord base install or make this role dependent on the supervisord role
+nginx_gunicorn_wsgi_port: 58080
 # nginx_access_log_file: "{{ application_log_dir }}/nginx_access.log"
 # nginx_error_log_file: "{{ application_log_dir }}/nginx_error.log"
 nginx_static_dir: "{{ application_path }}/collected_static_files/"

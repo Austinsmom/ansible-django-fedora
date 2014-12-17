@@ -72,6 +72,9 @@
     - gcc-c++
     - compat-gcc-34-c++
 
+    # so that yum optimizes its index with `yum cache-fast` daily
+    - yum-cron
+
     # required by pyodbc
     # - libxml
     # - libxml++
