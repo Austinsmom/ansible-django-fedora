@@ -1,7 +1,7 @@
-ansible-django-stack
+ansible-django-fedora
 ====================
 
-Ansible Playbook designed for environments running a Django app.  It installs and configures these applications that are commonly used in production Django deployments:
+Ansible Playbook to provision RHEL or fedora servers to run a Django app.  It installs and configures:
 - Nginx
 - Gunicorn
 - PostgreSQL
@@ -9,9 +9,9 @@ Ansible Playbook designed for environments running a Django app.  It installs an
 - Virtualenv
 - Memcached
 
-**Tested with OS:** Ubuntu 12.04.4 LTS x64
+**Tested with OS:** RHEL x64
 
-**Tested with Cloud Providers:** Amazon, Rackspace, Digital Ocean
+**Tested with Cloud Providers:** AWS
 
 ## Getting Started
 A quick way to get started is with Vagrant and VirtualBox.

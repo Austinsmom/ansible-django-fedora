@@ -1,0 +1,20 @@
+---
+
+- name: Spin up a {{ application_name }} virtual machine on AWS EC2
+  hosts: none
+  sudo: yes
+  sudo_user: "{{ sudo_user }}"
+  remote_user: ec2-user
+  vars:
+    - setup_git_repo: yes
+    - update_apt_cache: yes
+  vars_files:
+    - env_vars/base
+    - env_vars/local
+    - private/vars.yml
+
+  roles:
+    - base
+    - db
+    - web
+    - memcached
