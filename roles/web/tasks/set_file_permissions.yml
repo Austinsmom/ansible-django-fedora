@@ -1,5 +1,6 @@
 ---
 
+# what worked was setting this to 0777 because the bigdata:bigdata user ended being the one that ran the webapp and wrote to the logs
 - name: set app file tree permissions
   file: path={{ item }}
         recurse=yes

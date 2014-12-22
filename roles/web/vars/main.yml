@@ -3,6 +3,8 @@
 # Application settings.
 project_path: "{{ virtualenv_path }}/{{ project_name }}"
 application_path: "{{ project_path }}/{{ application_name }}"
+# what worked was: sudo chmod a+w /var/log/gunicorn && sudo chmod a+w /var/log/gunicorn/*
+# FIXME: Change this out from the virtualenv_path, to the system /vars/log/ path, I think
 application_log_dir: "{{ virtualenv_path }}/logs"
 application_log_file: "{{ application_log_dir }}/gunicorn_supervisor.log"
 requirements_file: "{{ application_path }}/requirements.txt"

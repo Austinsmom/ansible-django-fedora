@@ -1,0 +1,11 @@
+; extends supervisor.conf
+[program:{{ application_name }}_webapp]
+environment=PYTHONPATH=/usr/webapps/{{ application_name }}_prod/{{ application_name }}/webapp
+user=root
+command=/usr/local/share/.virtualenvs/{{ application_name }}/bin/gunicorn --timeout 3600 --workers 2 --user=bigdata --group=bigdata --log-file=/var/log/gunicorn/django_gunicorn_{{ application_name }}.log -b 127.0.0.1:{{ port_gunicorn_wsgi }} webapp.wsgi:application
+autostart=true
+autorestart=true
+stdout_logfile = /var/log/supervisor/{{ application_name }}.stdout.log
+stderr_logfile = /var/log/supervisor/{{ application_name }}.stderr.log
+redirect_stderr = True
+redirect_out = True
